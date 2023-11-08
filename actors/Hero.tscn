@@ -1,0 +1,32 @@
+[gd_scene load_steps=7 format=3 uid="uid://hqf6aa5mt1qs"]
+
+[ext_resource type="Script" path="res://actors/Hero.gd" id="1_a7cba"]
+[ext_resource type="Texture2D" uid="uid://bxja8hls0kh6" path="res://assets/hero.png" id="1_dfj8s"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/state_chart.gd" id="3_pupm7"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/compound_state.gd" id="4_la8fl"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/atomic_state.gd" id="5_hl3m4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1iqcp"]
+size = Vector2(32, 32)
+
+[node name="Hero" type="CharacterBody2D"]
+script = ExtResource("1_a7cba")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1iqcp")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("1_dfj8s")
+
+[node name="StateChart" type="Node" parent="."]
+script = ExtResource("3_pupm7")
+
+[node name="Root" type="Node" parent="StateChart"]
+script = ExtResource("4_la8fl")
+initial_state = NodePath("On Ground")
+
+[node name="On Ground" type="Node" parent="StateChart/Root"]
+script = ExtResource("5_hl3m4")
+
+[node name="Airborne" type="Node" parent="StateChart/Root"]
+script = ExtResource("5_hl3m4")
