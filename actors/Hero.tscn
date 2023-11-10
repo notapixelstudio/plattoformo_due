@@ -1,10 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://hqf6aa5mt1qs"]
+[gd_scene load_steps=9 format=3 uid="uid://hqf6aa5mt1qs"]
 
 [ext_resource type="Script" path="res://actors/Hero.gd" id="1_a7cba"]
 [ext_resource type="Texture2D" uid="uid://bxja8hls0kh6" path="res://assets/hero.png" id="1_dfj8s"]
 [ext_resource type="Script" path="res://addons/godot_state_charts/state_chart.gd" id="3_pupm7"]
 [ext_resource type="Script" path="res://addons/godot_state_charts/compound_state.gd" id="4_la8fl"]
 [ext_resource type="Script" path="res://addons/godot_state_charts/atomic_state.gd" id="5_hl3m4"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/transition.gd" id="6_yas5w"]
+[ext_resource type="PackedScene" uid="uid://bcwkugn6v3oy7" path="res://addons/godot_state_charts/utilities/state_chart_debugger.tscn" id="7_dberl"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1iqcp"]
 size = Vector2(32, 32)
@@ -23,10 +25,76 @@ script = ExtResource("3_pupm7")
 
 [node name="Root" type="Node" parent="StateChart"]
 script = ExtResource("4_la8fl")
-initial_state = NodePath("On Ground")
+initial_state = NodePath("On Floor")
 
-[node name="On Ground" type="Node" parent="StateChart/Root"]
+[node name="On Floor" type="Node" parent="StateChart/Root"]
+script = ExtResource("4_la8fl")
+initial_state = NodePath("Standing")
+
+[node name="Standing" type="Node" parent="StateChart/Root/On Floor"]
 script = ExtResource("5_hl3m4")
+
+[node name="to Jumping" type="Node" parent="StateChart/Root/On Floor/Standing"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../../Airborne/Jumping")
+event = &"start_jump"
+
+[node name="to Coyote Time" type="Node" parent="StateChart/Root/On Floor"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Airborne/Coyote Time")
+event = &"airborne"
+
+[node name="Landing" type="Node" parent="StateChart/Root/On Floor"]
+script = ExtResource("5_hl3m4")
+
+[node name="to Standing" type="Node" parent="StateChart/Root/On Floor/Landing"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Standing")
 
 [node name="Airborne" type="Node" parent="StateChart/Root"]
+script = ExtResource("4_la8fl")
+initial_state = NodePath("Falling")
+
+[node name="to Landing" type="Node" parent="StateChart/Root/Airborne"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../On Floor/Landing")
+event = &"on_floor"
+
+[node name="Jumping" type="Node" parent="StateChart/Root/Airborne"]
 script = ExtResource("5_hl3m4")
+
+[node name="to Falling" type="Node" parent="StateChart/Root/Airborne/Jumping"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Falling")
+event = &"end_jump"
+
+[node name="Falling" type="Node" parent="StateChart/Root/Airborne"]
+script = ExtResource("5_hl3m4")
+
+[node name="Coyote Time" type="Node" parent="StateChart/Root/Airborne"]
+script = ExtResource("5_hl3m4")
+
+[node name="to Jumping" type="Node" parent="StateChart/Root/Airborne/Coyote Time"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Jumping")
+event = &"start_jump"
+
+[node name="to Falling" type="Node" parent="StateChart/Root/Airborne/Coyote Time"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Falling")
+delay_seconds = 0.15
+
+[node name="Node" type="Node" parent="."]
+
+[node name="StateChartDebugger" parent="Node" instance=ExtResource("7_dberl")]
+offset_left = 752.0
+offset_top = 46.0
+offset_right = -106.0
+offset_bottom = -258.0
+initial_node_to_watch = NodePath("../../StateChart")
+
+[connection signal="state_entered" from="StateChart/Root/On Floor/Landing" to="." method="_on_landing_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Airborne/Jumping" to="." method="_on_jumping_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Airborne/Jumping" to="." method="_on_jumping_state_physics_processing"]
+[connection signal="state_physics_processing" from="StateChart/Root/Airborne/Falling" to="." method="_on_falling_state_physics_processing"]
+[connection signal="state_physics_processing" from="StateChart/Root/Airborne/Coyote Time" to="." method="_on_coyote_time_state_physics_processing"]
