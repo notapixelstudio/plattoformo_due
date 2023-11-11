@@ -10,7 +10,7 @@ const JUMP_VELOCITY = 400.0
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 func _ready():
-	InputBuffer.add_monitored_action('ui_accept')
+	InputBuffer.add_monitored_action('p1_jump')
 
 func _physics_process(delta):
 	$StateChart.set_expression_property('velocity', velocity.y)
@@ -27,8 +27,7 @@ func _physics_process(delta):
 		$StateChart.send_event('end_jump')
 		
 	
-	# As good practice, you should replace UI actions with custom gameplay actions.
-	var direction = Input.get_axis("ui_left", "ui_right")
+	var direction = Input.get_axis("p1_left", "p1_right")
 	if direction:
 		velocity.x = direction * speed
 	else:
@@ -60,7 +59,7 @@ func _on_coyote_time_state_physics_processing(delta):
 	_apply_strong_gravity(delta)
 
 func _on_landing_state_entered():
-	var is_jump_action_buffered = InputBuffer.is_action_buffered('ui_accept', 200)
+	var is_jump_action_buffered = InputBuffer.is_action_buffered('p1_jump', 200)
 	if is_jump_action_buffered:
 		print('Executing buffered jump')
 		$StateChart.send_event('start_jump')
