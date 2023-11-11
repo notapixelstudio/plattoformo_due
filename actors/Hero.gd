@@ -45,6 +45,7 @@ func _apply_strong_gravity(delta):
 	
 	
 func _on_jumping_state_entered():
+	$AnimationPlayer.play("jump")
 	velocity.y = -jump_velocity
 
 func _on_jumping_state_physics_processing(delta):
@@ -63,3 +64,5 @@ func _on_landing_state_entered():
 	if is_jump_action_buffered:
 		print('Executing buffered jump')
 		$StateChart.send_event('start_jump')
+	else:
+		$AnimationPlayer.play("squash")

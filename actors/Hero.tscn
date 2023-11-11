@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://hqf6aa5mt1qs"]
+[gd_scene load_steps=13 format=3 uid="uid://hqf6aa5mt1qs"]
 
 [ext_resource type="Script" path="res://actors/Hero.gd" id="1_a7cba"]
 [ext_resource type="Texture2D" uid="uid://bxja8hls0kh6" path="res://assets/hero.png" id="1_dfj8s"]
@@ -11,6 +11,96 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1iqcp"]
 size = Vector2(32, 32)
 
+[sub_resource type="Animation" id="Animation_3abg0"]
+resource_name = "squash"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.3),
+"transitions": PackedFloat32Array(-2, -2, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 3), Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.3),
+"transitions": PackedFloat32Array(-2, -2, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.2, 0.8), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_kub3g"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(-2),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(-2),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_lcwcn"]
+resource_name = "jump"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(-2, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, -3)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(-2, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(0.8, 1.2)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ssx53"]
+_data = {
+"RESET": SubResource("Animation_kub3g"),
+"jump": SubResource("Animation_lcwcn"),
+"squash": SubResource("Animation_3abg0")
+}
+
 [node name="Hero" type="CharacterBody2D"]
 script = ExtResource("1_a7cba")
 
@@ -19,6 +109,11 @@ shape = SubResource("RectangleShape2D_1iqcp")
 
 [node name="Sprite" type="Sprite2D" parent="."]
 texture = ExtResource("1_dfj8s")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_ssx53")
+}
 
 [node name="StateChart" type="Node" parent="."]
 script = ExtResource("3_pupm7")

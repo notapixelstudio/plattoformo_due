@@ -12,5 +12,3 @@ layer_0/tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 0, 131072, 0, 0, 196608,
 
 [node name="Hero" parent="." instance=ExtResource("2_ttnc4")]
 position = Vector2(448, 432)
-speed = 400
-jump_velocity = 600
