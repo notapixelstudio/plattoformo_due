@@ -71,6 +71,9 @@ func _on_falling_state_physics_processing(delta):
 func _on_coyote_time_state_physics_processing(delta):
 	_apply_strong_gravity(delta)
 	
+func _on_coyote_time_wall_state_physics_processing(delta):
+	_apply_strong_gravity(delta)
+	
 func _on_sliding_down_state_entered():
 	velocity.y = 0
 	

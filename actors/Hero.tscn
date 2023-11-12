@@ -218,6 +218,19 @@ script = ExtResource("6_yas5w")
 to = NodePath("../../Falling")
 delay_seconds = 0.15
 
+[node name="Coyote Time (Wall)" type="Node" parent="StateChart/Root/Airborne"]
+script = ExtResource("5_hl3m4")
+
+[node name="to WallJumping" type="Node" parent="StateChart/Root/Airborne/Coyote Time (Wall)"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../WallJumping")
+event = &"start_jump"
+
+[node name="to Falling" type="Node" parent="StateChart/Root/Airborne/Coyote Time (Wall)"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Falling")
+delay_seconds = 0.2
+
 [node name="On Wall" type="Node" parent="StateChart/Root"]
 script = ExtResource("4_la8fl")
 initial_state = NodePath("Sliding Down")
@@ -232,14 +245,14 @@ script = ExtResource("6_yas5w")
 to = NodePath("../../On Floor/Landing")
 event = &"on_floor"
 
-[node name="to Airborne" type="Node" parent="StateChart/Root/On Wall"]
+[node name="to Coyote Time (Wall)" type="Node" parent="StateChart/Root/On Wall"]
 script = ExtResource("6_yas5w")
-to = NodePath("../../Airborne")
+to = NodePath("../../Airborne/Coyote Time (Wall)")
 event = &"airborne"
 
-[node name="to Airborne (not clinging)" type="Node" parent="StateChart/Root/On Wall"]
+[node name="to Coyote Time (Wall) when not clinging" type="Node" parent="StateChart/Root/On Wall"]
 script = ExtResource("6_yas5w")
-to = NodePath("../../Airborne")
+to = NodePath("../../Airborne/Coyote Time (Wall)")
 event = &"on_wall"
 guard = SubResource("Resource_ku2p7")
 
@@ -270,6 +283,7 @@ initial_node_to_watch = NodePath("../../StateChart")
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Ascending" to="." method="_on_ascending_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Falling" to="." method="_on_falling_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Coyote Time" to="." method="_on_coyote_time_state_physics_processing"]
+[connection signal="state_physics_processing" from="StateChart/Root/Airborne/Coyote Time (Wall)" to="." method="_on_coyote_time_wall_state_physics_processing"]
 [connection signal="state_entered" from="StateChart/Root/On Wall" to="." method="_on_on_wall_state_entered"]
 [connection signal="state_physics_processing" from="StateChart/Root/On Wall/Sliding Up" to="." method="_on_sliding_up_state_physics_processing"]
 [connection signal="state_entered" from="StateChart/Root/On Wall/Sliding Down" to="." method="_on_sliding_down_state_entered"]
