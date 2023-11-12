@@ -1,24 +1,25 @@
 extends CharacterBody2D
 
 @export var speed = 400
+@export var acceleration = 2500
 @export var jump_velocity = 600
-
-const SPEED = 300.0
-const JUMP_VELOCITY = 400.0
+@export var wall_jump_velocity = 750
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
+var last_valid_wall_normal : Vector2
+
 func _ready():
 	InputBuffer.add_monitored_action('p1_jump')
+	
+func _get_direction():
+	return Input.get_axis("p1_left", "p1_right")
 
 func _physics_process(delta):
-	var direction = Input.get_axis("p1_left", "p1_right")
-	if direction:
-		velocity.x = direction * speed
-	else:
-		velocity.x = move_toward(velocity.x, 0, speed)
-		
+	var direction = _get_direction()
+	velocity.x = move_toward(velocity.x, direction * speed if direction else 0, acceleration * delta)
+	
 	$StateChart.set_expression_property('velocity', velocity.y)
 	
 	if is_on_floor():
@@ -26,6 +27,7 @@ func _physics_process(delta):
 	elif is_on_wall():
 		$StateChart.send_event('on_wall')
 		$StateChart.set_expression_property('clinging', sign(direction) != sign(get_wall_normal().y))
+		last_valid_wall_normal = get_wall_normal()
 	else:
 		$StateChart.send_event('airborne')
 	
@@ -51,8 +53,12 @@ func _apply_weak_gravity(delta):
 func _on_jumping_state_entered():
 	$AnimationPlayer.play("jump")
 	velocity.y = -jump_velocity
-
-func _on_jumping_state_physics_processing(delta):
+	
+func _on_wall_jumping_state_entered():
+	$AnimationPlayer.play("jump")
+	velocity = Vector2.UP.rotated(PI/3 * sign(last_valid_wall_normal.y)) * wall_jump_velocity
+	
+func _on_ascending_state_physics_processing(delta):
 	_apply_gravity(delta)
 	if velocity.y > 0:
 		$StateChart.send_event('end_jump')

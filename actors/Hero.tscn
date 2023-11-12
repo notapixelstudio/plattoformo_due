@@ -164,22 +164,36 @@ script = ExtResource("6_yas5w")
 to = NodePath("../../On Floor/Landing")
 event = &"on_floor"
 
+[node name="to On Wall" type="Node" parent="StateChart/Root/Airborne"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../On Wall")
+event = &"on_wall"
+guard = SubResource("Resource_f88qq")
+
 [node name="Jumping" type="Node" parent="StateChart/Root/Airborne"]
 script = ExtResource("5_hl3m4")
 
-[node name="to Falling" type="Node" parent="StateChart/Root/Airborne/Jumping"]
+[node name="to Ascending" type="Node" parent="StateChart/Root/Airborne/Jumping"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Ascending")
+
+[node name="WallJumping" type="Node" parent="StateChart/Root/Airborne"]
+script = ExtResource("5_hl3m4")
+
+[node name="to Ascending" type="Node" parent="StateChart/Root/Airborne/WallJumping"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Ascending")
+
+[node name="Ascending" type="Node" parent="StateChart/Root/Airborne"]
+script = ExtResource("5_hl3m4")
+
+[node name="to Falling" type="Node" parent="StateChart/Root/Airborne/Ascending"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../Falling")
 event = &"end_jump"
 
 [node name="Falling" type="Node" parent="StateChart/Root/Airborne"]
 script = ExtResource("5_hl3m4")
-
-[node name="to On Wall" type="Node" parent="StateChart/Root/Airborne/Falling"]
-script = ExtResource("6_yas5w")
-to = NodePath("../../../On Wall")
-event = &"on_wall"
-guard = SubResource("Resource_f88qq")
 
 [node name="Coyote Time" type="Node" parent="StateChart/Root/Airborne"]
 script = ExtResource("5_hl3m4")
@@ -201,6 +215,11 @@ initial_state = NodePath("Sliding Down")
 [node name="Sliding Down" type="Node" parent="StateChart/Root/On Wall"]
 script = ExtResource("5_hl3m4")
 
+[node name="to WallJumping" type="Node" parent="StateChart/Root/On Wall/Sliding Down"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../../Airborne/WallJumping")
+event = &"start_jump"
+
 [node name="to Landing" type="Node" parent="StateChart/Root/On Wall"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../On Floor/Landing")
@@ -216,6 +235,7 @@ script = ExtResource("6_yas5w")
 to = NodePath("../../Airborne")
 event = &"on_wall"
 guard = SubResource("Resource_ku2p7")
+delay_seconds = 0.2
 
 [node name="Node" type="Node" parent="."]
 
@@ -228,7 +248,8 @@ initial_node_to_watch = NodePath("../../StateChart")
 
 [connection signal="state_entered" from="StateChart/Root/On Floor/Landing" to="." method="_on_landing_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Airborne/Jumping" to="." method="_on_jumping_state_entered"]
-[connection signal="state_physics_processing" from="StateChart/Root/Airborne/Jumping" to="." method="_on_jumping_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Airborne/WallJumping" to="." method="_on_wall_jumping_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Airborne/Ascending" to="." method="_on_ascending_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Falling" to="." method="_on_falling_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Coyote Time" to="." method="_on_coyote_time_state_physics_processing"]
 [connection signal="state_entered" from="StateChart/Root/On Wall/Sliding Down" to="." method="_on_sliding_down_state_entered"]
