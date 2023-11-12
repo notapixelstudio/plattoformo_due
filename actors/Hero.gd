@@ -3,7 +3,7 @@ extends CharacterBody2D
 @export var speed = 400
 @export var acceleration = 2500
 @export var jump_velocity = 600
-@export var wall_jump_velocity = 750
+@export var wall_jump_velocity = 800
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
@@ -20,13 +20,13 @@ func _physics_process(delta):
 	var direction = _get_direction()
 	velocity.x = move_toward(velocity.x, direction * speed if direction else 0, acceleration * delta)
 	
-	$StateChart.set_expression_property('velocity', velocity.y)
+	$StateChart.set_expression_property('velocity', velocity)
 	
 	if is_on_floor():
 		$StateChart.send_event('on_floor')
 	elif is_on_wall():
 		$StateChart.send_event('on_wall')
-		$StateChart.set_expression_property('clinging', sign(direction) != sign(get_wall_normal().y))
+		$StateChart.set_expression_property('clinging', sign(direction) != get_wall_normal().x)
 		last_valid_wall_normal = get_wall_normal()
 	else:
 		$StateChart.send_event('airborne')
@@ -56,7 +56,7 @@ func _on_jumping_state_entered():
 	
 func _on_wall_jumping_state_entered():
 	$AnimationPlayer.play("jump")
-	velocity = Vector2.UP.rotated(PI/3 * sign(last_valid_wall_normal.y)) * wall_jump_velocity
+	velocity = Vector2.UP.rotated(PI/3.5 * last_valid_wall_normal.x) * wall_jump_velocity
 	
 func _on_ascending_state_physics_processing(delta):
 	_apply_gravity(delta)
@@ -74,12 +74,19 @@ func _on_sliding_down_state_entered():
 	
 func _on_sliding_down_state_physics_processing(delta):
 	_apply_weak_gravity(delta)
+	
+func _on_sliding_up_state_physics_processing(delta):
+	_apply_strong_gravity(delta)
 
 func _on_landing_state_entered():
-	var is_jump_action_buffered = InputBuffer.is_action_buffered('p1_jump', 200)
-	if is_jump_action_buffered:
+	if InputBuffer.is_action_buffered('p1_jump', 200):
 		print('Executing buffered jump')
 		$StateChart.send_event('start_jump')
 	else:
 		$AnimationPlayer.play("squash")
+		
+func _on_on_wall_state_entered():
+	if InputBuffer.is_action_buffered('p1_jump', 100):
+		print('Executing buffered wall jump')
+		$StateChart.send_event('start_jump')
 		
