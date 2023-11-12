@@ -18,23 +18,24 @@ func _get_direction():
 
 func _physics_process(delta):
 	var direction = _get_direction()
-	velocity.x = move_toward(velocity.x, direction * speed if direction else 0, acceleration * delta)
+	velocity.x = move_toward(velocity.x, direction * speed, acceleration * delta)
 	
 	$StateChart.set_expression_property('velocity', velocity)
+	$StateChart.set_expression_property('clinging', false)
 	
 	if is_on_floor():
 		$StateChart.send_event('on_floor')
 	elif is_on_wall():
+		$StateChart.set_expression_property('clinging', sign(direction) == -get_wall_normal().x)
 		$StateChart.send_event('on_wall')
-		$StateChart.set_expression_property('clinging', sign(direction) != get_wall_normal().x)
 		last_valid_wall_normal = get_wall_normal()
 	else:
 		$StateChart.send_event('airborne')
 	
-	if Input.is_action_just_pressed("ui_accept"):
+	if Input.is_action_just_pressed("p1_jump"):
 		$StateChart.send_event('start_jump')
 		
-	if Input.is_action_just_released("ui_accept"):
+	if Input.is_action_just_released("p1_jump"):
 		$StateChart.send_event('end_jump')
 		
 	move_and_slide()
@@ -51,6 +52,7 @@ func _apply_weak_gravity(delta):
 	
 	
 func _on_jumping_state_entered():
+	InputBuffer.consume_buffered_action('p1_jump')
 	$AnimationPlayer.play("jump")
 	velocity.y = -jump_velocity
 	
@@ -86,7 +88,7 @@ func _on_landing_state_entered():
 		$AnimationPlayer.play("squash")
 		
 func _on_on_wall_state_entered():
-	if InputBuffer.is_action_buffered('p1_jump', 100):
+	if InputBuffer.is_action_buffered('p1_jump', 200):
 		print('Executing buffered wall jump')
 		$StateChart.send_event('start_jump')
 		

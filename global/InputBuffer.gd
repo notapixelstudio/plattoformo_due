@@ -17,7 +17,11 @@ func _delete_released(event):
 			_monitor[action] = null
 
 func add_monitored_action(action : String):
-	_monitor[action] = null # no timestamp yet
+	if action not in _monitor:
+		_monitor[action] = null # no timestamp yet
 
 func is_action_buffered(action : String, duration_msec : int):
 	return action in _monitor and _monitor[action] != null and Time.get_ticks_msec() - _monitor[action] <= duration_msec
+
+func consume_buffered_action(action : String):
+	_monitor[action] = null
