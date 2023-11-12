@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://hqf6aa5mt1qs"]
+[gd_scene load_steps=16 format=3 uid="uid://hqf6aa5mt1qs"]
 
 [ext_resource type="Script" path="res://actors/Hero.gd" id="1_a7cba"]
 [ext_resource type="Texture2D" uid="uid://bxja8hls0kh6" path="res://assets/hero.png" id="1_dfj8s"]
@@ -7,37 +7,10 @@
 [ext_resource type="Script" path="res://addons/godot_state_charts/atomic_state.gd" id="5_hl3m4"]
 [ext_resource type="Script" path="res://addons/godot_state_charts/transition.gd" id="6_yas5w"]
 [ext_resource type="PackedScene" uid="uid://bcwkugn6v3oy7" path="res://addons/godot_state_charts/utilities/state_chart_debugger.tscn" id="7_dberl"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/expression_guard.gd" id="7_fqiti"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1iqcp"]
 size = Vector2(32, 32)
-
-[sub_resource type="Animation" id="Animation_3abg0"]
-resource_name = "squash"
-length = 0.3
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.3),
-"transitions": PackedFloat32Array(-2, -2, 1),
-"update": 0,
-"values": [Vector2(0, 0), Vector2(0, 3), Vector2(0, 0)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Sprite:scale")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.3),
-"transitions": PackedFloat32Array(-2, -2, 1),
-"update": 0,
-"values": [Vector2(1, 1), Vector2(1.2, 0.8), Vector2(1, 1)]
-}
 
 [sub_resource type="Animation" id="Animation_kub3g"]
 length = 0.001
@@ -94,12 +67,48 @@ tracks/1/keys = {
 "values": [Vector2(1, 1), Vector2(0.8, 1.2)]
 }
 
+[sub_resource type="Animation" id="Animation_3abg0"]
+resource_name = "squash"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.3),
+"transitions": PackedFloat32Array(-2, -2, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 3), Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.3),
+"transitions": PackedFloat32Array(-2, -2, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.2, 0.8), Vector2(1, 1)]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ssx53"]
 _data = {
 "RESET": SubResource("Animation_kub3g"),
 "jump": SubResource("Animation_lcwcn"),
 "squash": SubResource("Animation_3abg0")
 }
+
+[sub_resource type="Resource" id="Resource_f88qq"]
+script = ExtResource("7_fqiti")
+expression = "clinging"
+
+[sub_resource type="Resource" id="Resource_ku2p7"]
+script = ExtResource("7_fqiti")
+expression = "not clinging"
 
 [node name="Hero" type="CharacterBody2D"]
 script = ExtResource("1_a7cba")
@@ -166,6 +175,12 @@ event = &"end_jump"
 [node name="Falling" type="Node" parent="StateChart/Root/Airborne"]
 script = ExtResource("5_hl3m4")
 
+[node name="to On Wall" type="Node" parent="StateChart/Root/Airborne/Falling"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../../On Wall")
+event = &"on_wall"
+guard = SubResource("Resource_f88qq")
+
 [node name="Coyote Time" type="Node" parent="StateChart/Root/Airborne"]
 script = ExtResource("5_hl3m4")
 
@@ -178,6 +193,29 @@ event = &"start_jump"
 script = ExtResource("6_yas5w")
 to = NodePath("../../Falling")
 delay_seconds = 0.15
+
+[node name="On Wall" type="Node" parent="StateChart/Root"]
+script = ExtResource("4_la8fl")
+initial_state = NodePath("Sliding Down")
+
+[node name="Sliding Down" type="Node" parent="StateChart/Root/On Wall"]
+script = ExtResource("5_hl3m4")
+
+[node name="to Landing" type="Node" parent="StateChart/Root/On Wall"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../On Floor/Landing")
+event = &"on_floor"
+
+[node name="to Airborne" type="Node" parent="StateChart/Root/On Wall"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Airborne")
+event = &"airborne"
+
+[node name="to Airborne (not clinging)" type="Node" parent="StateChart/Root/On Wall"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Airborne")
+event = &"on_wall"
+guard = SubResource("Resource_ku2p7")
 
 [node name="Node" type="Node" parent="."]
 
@@ -193,3 +231,5 @@ initial_node_to_watch = NodePath("../../StateChart")
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Jumping" to="." method="_on_jumping_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Falling" to="." method="_on_falling_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Coyote Time" to="." method="_on_coyote_time_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/On Wall/Sliding Down" to="." method="_on_sliding_down_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/On Wall/Sliding Down" to="." method="_on_sliding_down_state_physics_processing"]
