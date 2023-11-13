@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://hqf6aa5mt1qs"]
+[gd_scene load_steps=19 format=3 uid="uid://hqf6aa5mt1qs"]
 
 [ext_resource type="Script" path="res://actors/Hero.gd" id="1_a7cba"]
 [ext_resource type="Texture2D" uid="uid://bxja8hls0kh6" path="res://assets/hero.png" id="1_dfj8s"]
@@ -95,9 +95,38 @@ tracks/1/keys = {
 "values": [Vector2(1, 1), Vector2(1.2, 0.8), Vector2(1, 1)]
 }
 
+[sub_resource type="Animation" id="Animation_p5m8m"]
+resource_name = "dive"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(-2, 1),
+"update": 0,
+"values": [Vector2(0, -3), Vector2(0, -6)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(-2, 1),
+"update": 0,
+"values": [Vector2(0.8, 1.2), Vector2(0.6, 1.5)]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ssx53"]
 _data = {
 "RESET": SubResource("Animation_kub3g"),
+"dive": SubResource("Animation_p5m8m"),
 "jump": SubResource("Animation_lcwcn"),
 "squash": SubResource("Animation_3abg0")
 }
@@ -112,7 +141,7 @@ expression = "clinging and velocity.y >= 0"
 
 [sub_resource type="Resource" id="Resource_gxgyp"]
 script = ExtResource("7_fqiti")
-expression = "heading_down"
+expression = "not clinging and heading_down"
 
 [sub_resource type="Resource" id="Resource_ku2p7"]
 script = ExtResource("7_fqiti")
@@ -281,6 +310,12 @@ guard = SubResource("Resource_ikki5")
 [node name="Sliding Down" type="Node" parent="StateChart/Root/On Wall"]
 script = ExtResource("5_hl3m4")
 
+[node name="to Diving" type="Node" parent="StateChart/Root/On Wall/Sliding Down"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../../Airborne/Diving")
+event = &"on_wall"
+guard = SubResource("Resource_gxgyp")
+
 [node name="Node" type="Node" parent="."]
 
 [node name="StateChartDebugger" parent="Node" instance=ExtResource("7_dberl")]
@@ -295,6 +330,7 @@ initial_node_to_watch = NodePath("../../StateChart")
 [connection signal="state_entered" from="StateChart/Root/Airborne/WallJumping" to="." method="_on_wall_jumping_state_entered"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Ascending" to="." method="_on_ascending_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Falling" to="." method="_on_falling_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Airborne/Diving" to="." method="_on_diving_state_entered"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Diving" to="." method="_on_diving_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Coyote Time" to="." method="_on_coyote_time_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Coyote Time (Wall)" to="." method="_on_coyote_time_wall_state_physics_processing"]

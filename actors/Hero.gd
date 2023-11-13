@@ -102,3 +102,5 @@ func _on_on_wall_state_entered():
 		print('Executing buffered wall jump')
 		$StateChart.send_event('start_jump')
 		
+func _on_diving_state_entered():
+	$AnimationPlayer.play("dive")
