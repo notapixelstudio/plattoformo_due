@@ -22,6 +22,7 @@ func _physics_process(delta):
 	
 	$StateChart.set_expression_property('velocity', velocity)
 	$StateChart.set_expression_property('clinging', false)
+	$StateChart.set_expression_property('heading_down', Input.get_action_strength("p1_down") > 0)
 	
 	if is_on_floor():
 		$StateChart.send_event('on_floor')
@@ -47,6 +48,9 @@ func _apply_gravity(delta):
 func _apply_strong_gravity(delta):
 	velocity.y += 2 * gravity * delta
 	
+func _apply_super_strong_gravity(delta):
+	velocity.y += 3 * gravity * delta
+	
 func _apply_weak_gravity(delta):
 	velocity.y += 0.3 * gravity * delta
 	
@@ -67,6 +71,9 @@ func _on_ascending_state_physics_processing(delta):
 
 func _on_falling_state_physics_processing(delta):
 	_apply_strong_gravity(delta)
+	
+func _on_diving_state_physics_processing(delta):
+	_apply_super_strong_gravity(delta)
 
 func _on_coyote_time_state_physics_processing(delta):
 	_apply_strong_gravity(delta)
