@@ -27,9 +27,9 @@ func _physics_process(delta):
 	if is_on_floor():
 		$StateChart.send_event('on_floor')
 	elif is_on_wall():
+		last_valid_wall_normal = get_wall_normal()
 		$StateChart.set_expression_property('clinging', sign(direction) == -get_wall_normal().x)
 		$StateChart.send_event('on_wall')
-		last_valid_wall_normal = get_wall_normal()
 	else:
 		$StateChart.send_event('airborne')
 	
@@ -97,10 +97,24 @@ func _on_landing_state_entered():
 	else:
 		$AnimationPlayer.play("squash")
 		
-func _on_on_wall_state_entered():
-	if InputBuffer.is_action_buffered('p1_jump', 200):
-		print('Executing buffered wall jump')
-		$StateChart.send_event('start_jump')
 		
 func _on_diving_state_entered():
 	$AnimationPlayer.play("dive")
+
+func _on_on_floor_state_entered():
+	$DebugSprites.show_state('on_floor')
+
+func _on_airborne_state_entered():
+	$DebugSprites.show_state('airborne')
+
+func _on_on_wall_state_entered():
+	if last_valid_wall_normal.x < 0:
+		$DebugSprites.show_state('on_wall_right')
+	else:
+		$DebugSprites.show_state('on_wall_left')
+	
+	if InputBuffer.is_action_buffered('p1_jump', 200):
+		print('Executing buffered wall jump')
+		$StateChart.send_event('start_jump')
+
+

@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://hqf6aa5mt1qs"]
+[gd_scene load_steps=20 format=3 uid="uid://hqf6aa5mt1qs"]
 
 [ext_resource type="Script" path="res://actors/Hero.gd" id="1_a7cba"]
 [ext_resource type="Texture2D" uid="uid://bxja8hls0kh6" path="res://assets/hero.png" id="1_dfj8s"]
@@ -11,6 +11,22 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1iqcp"]
 size = Vector2(32, 32)
+
+[sub_resource type="GDScript" id="GDScript_kt0gi"]
+script/source = "extends Node2D
+
+func show_state(name : String):
+	for child in get_children():
+		child.visible = false
+		
+	match name:
+		'on_floor':
+			$OnFloor.visible = true
+		'on_wall_left':
+			$OnWallLeft.visible = true
+		'on_wall_right':
+			$OnWallRight.visible = true
+"
 
 [sub_resource type="Animation" id="Animation_kub3g"]
 length = 0.001
@@ -133,15 +149,15 @@ _data = {
 
 [sub_resource type="Resource" id="Resource_f88qq"]
 script = ExtResource("7_fqiti")
-expression = "clinging and velocity.y < 0"
+expression = "clinging and velocity.y < 0 and not heading_down"
 
 [sub_resource type="Resource" id="Resource_ikki5"]
 script = ExtResource("7_fqiti")
-expression = "clinging and velocity.y >= 0"
+expression = "clinging and velocity.y >= 0 and not heading_down"
 
 [sub_resource type="Resource" id="Resource_gxgyp"]
 script = ExtResource("7_fqiti")
-expression = "not clinging and heading_down"
+expression = "heading_down"
 
 [sub_resource type="Resource" id="Resource_ku2p7"]
 script = ExtResource("7_fqiti")
@@ -156,6 +172,27 @@ shape = SubResource("RectangleShape2D_1iqcp")
 [node name="Sprite" type="Sprite2D" parent="."]
 texture = ExtResource("1_dfj8s")
 
+[node name="DebugSprites" type="Node2D" parent="."]
+script = SubResource("GDScript_kt0gi")
+
+[node name="OnFloor" type="Sprite2D" parent="DebugSprites"]
+modulate = Color(0, 0, 0, 1)
+position = Vector2(5.68434e-14, 25.5)
+scale = Vector2(1, 0.21875)
+texture = ExtResource("1_dfj8s")
+
+[node name="OnWallLeft" type="Sprite2D" parent="DebugSprites"]
+modulate = Color(0, 0, 0, 1)
+position = Vector2(-23.5, -1.69407e-21)
+scale = Vector2(0.21875, 1)
+texture = ExtResource("1_dfj8s")
+
+[node name="OnWallRight" type="Sprite2D" parent="DebugSprites"]
+modulate = Color(0, 0, 0, 1)
+position = Vector2(24, 0)
+scale = Vector2(0.21875, 1)
+texture = ExtResource("1_dfj8s")
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 "": SubResource("AnimationLibrary_ssx53")
@@ -166,7 +203,7 @@ script = ExtResource("3_pupm7")
 
 [node name="Root" type="Node" parent="StateChart"]
 script = ExtResource("4_la8fl")
-initial_state = NodePath("On Floor")
+initial_state = NodePath("Airborne")
 
 [node name="On Floor" type="Node" parent="StateChart/Root"]
 script = ExtResource("4_la8fl")
@@ -325,7 +362,9 @@ offset_right = -106.0
 offset_bottom = -258.0
 initial_node_to_watch = NodePath("../../StateChart")
 
+[connection signal="state_entered" from="StateChart/Root/On Floor" to="." method="_on_on_floor_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/On Floor/Landing" to="." method="_on_landing_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Airborne" to="." method="_on_airborne_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Airborne/Jumping" to="." method="_on_jumping_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Airborne/WallJumping" to="." method="_on_wall_jumping_state_entered"]
 [connection signal="state_physics_processing" from="StateChart/Root/Airborne/Ascending" to="." method="_on_ascending_state_physics_processing"]
