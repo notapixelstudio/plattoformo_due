@@ -1,13 +1,13 @@
 [gd_resource type="TileSet" load_steps=6 format=3 uid="uid://cd6hbvgl1e2xy"]
 
-[ext_resource type="Texture2D" uid="uid://d2evtvw3l7jug" path="res://godot_state_charts_examples/platformer/terrain/terrain_tiles.png" id="1_g8rgd"]
-[ext_resource type="Texture2D" uid="uid://bap00a5gcipy6" path="res://godot_state_charts_examples/platformer/terrain/green.png" id="2_q18a4"]
+[ext_resource type="Texture2D" uid="uid://d2evtvw3l7jug" path="res://assets/tileset/terrain_tiles.png" id="1_b13c0"]
+[ext_resource type="Texture2D" uid="uid://bap00a5gcipy6" path="res://assets/tileset/green.png" id="2_pogk7"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_8w8gx"]
 friction = 0.0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_p8in1"]
-texture = ExtResource("1_g8rgd")
+texture = ExtResource("1_b13c0")
 6:4/0 = 0
 6:4/0/physics_layer_0/linear_velocity = Vector2(0, 0)
 6:4/0/physics_layer_0/angular_velocity = 0.0
@@ -139,7 +139,7 @@ texture = ExtResource("1_g8rgd")
 1:2/0/terrains_peering_bit/top_right_corner = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gpldh"]
-texture = ExtResource("2_q18a4")
+texture = ExtResource("2_pogk7")
 0:0/0 = 0
 0:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
 0:0/0/physics_layer_0/angular_velocity = 0.0
