@@ -5,6 +5,8 @@ extends CharacterBody2D
 @export var jump_velocity = 600
 @export var wall_jump_velocity = 800
 
+@export var tilemap : TileMap
+
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
@@ -41,6 +43,8 @@ func _physics_process(delta):
 		
 	move_and_slide()
 	
+	# debug head tile position
+	%TileDebug.position = tilemap.map_to_local(_get_head_cell_coords())
 	
 func _apply_gravity(delta):
 	velocity.y += gravity * delta
@@ -68,6 +72,23 @@ func _on_ascending_state_physics_processing(delta):
 	_apply_gravity(delta)
 	if velocity.y > 0:
 		$StateChart.send_event('end_jump')
+	else:
+		if test_move(transform, velocity*delta):
+			var coords = _get_head_cell_coords(Vector2i(1,-1))
+			%CollisionTileDebug.position = tilemap.map_to_local(coords)
+			var tile_data = tilemap.get_cell_tile_data(0, coords)
+			if tile_data:
+				var corner_dir = tile_data.get_custom_data('corner_dir')
+				if corner_dir == Vector2i(-1,1):
+					global_position.x = tilemap.map_to_local(coords).x - 25 # ???
+				
+			coords = _get_head_cell_coords(Vector2i(-1,-1))
+			%CollisionTileDebug2.position = tilemap.map_to_local(coords)
+			tile_data = tilemap.get_cell_tile_data(0, coords)
+			if tile_data:
+				var corner_dir = tile_data.get_custom_data('corner_dir')
+				if corner_dir == Vector2i(1,1):
+					global_position.x = tilemap.map_to_local(coords).x + 25 # ???
 
 func _on_falling_state_physics_processing(delta):
 	_apply_strong_gravity(delta)
@@ -118,3 +139,5 @@ func _on_on_wall_state_entered():
 		$StateChart.send_event('start_jump')
 
 
+func _get_head_cell_coords(offset=Vector2i(0,0)):
+	return tilemap.local_to_map(global_position+Vector2(0,-15.9)) + offset
