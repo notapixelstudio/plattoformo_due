@@ -2,8 +2,8 @@ extends CharacterBody2D
 
 @export var speed = 400
 @export var acceleration = 2500
-@export var jump_velocity = 600
-@export var wall_jump_velocity = 800
+@export var jump_velocity = 580
+@export var wall_jump_velocity = 770
 
 @export var tilemap : TileMap
 
