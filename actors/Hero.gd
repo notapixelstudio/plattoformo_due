@@ -10,8 +10,7 @@ extends CharacterBody2D
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
-var last_valid_wall_normal : Vector2
-var _head_cell : Vector2i
+var _last_wall_dir # int or null
 
 func _ready():
 	InputBuffer.add_monitored_action('p1_jump')
@@ -20,8 +19,6 @@ func _get_direction():
 	return Input.get_axis("p1_left", "p1_right")
 
 func _physics_process(delta):
-	_head_cell = tilemap.local_to_map(global_position+Vector2(0,-15.9))
-	
 	var direction = _get_direction()
 	velocity.x = move_toward(velocity.x, direction * speed, acceleration * delta)
 	
@@ -29,15 +26,27 @@ func _physics_process(delta):
 	$StateChart.set_expression_property('clinging', false)
 	$StateChart.set_expression_property('heading_down', Input.get_action_strength("p1_down") > 0)
 	
+	# check if we are near a wall
+	var near_left = _is_near_wall(-1)
+	var near_right = _is_near_wall(1)
+	$StateChart.set_expression_property('near_wall', near_left or near_right)
+	if near_left:
+		_last_wall_dir = -1
+	elif near_right:
+		_last_wall_dir = 1
+	else:
+		_last_wall_dir = null
+	
 	if is_on_floor():
 		$StateChart.send_event('on_floor')
 	elif is_on_wall():
-		last_valid_wall_normal = get_wall_normal()
-		$StateChart.set_expression_property('clinging', sign(direction) == -get_wall_normal().x)
+		if _last_wall_dir == null: # it is possible to be on_wall without being near_wall in some literal corner cases
+			_last_wall_dir = -get_wall_normal().x
+		$StateChart.set_expression_property('clinging', sign(direction) == _last_wall_dir)
 		$StateChart.send_event('on_wall')
 	else:
 		$StateChart.send_event('airborne')
-	
+		
 	if Input.is_action_just_pressed("p1_jump"):
 		$StateChart.send_event('start_jump')
 		
@@ -45,9 +54,6 @@ func _physics_process(delta):
 		$StateChart.send_event('end_jump')
 		
 	move_and_slide()
-	
-#	DEBUG head tile position
-#	%TileDebug.position = tilemap.map_to_local(_head_cell)
 	
 func _apply_gravity(delta):
 	velocity.y += gravity * delta
@@ -68,16 +74,20 @@ func _on_jumping_state_entered():
 	velocity.y = -jump_velocity
 	
 func _on_wall_jumping_state_entered():
+	InputBuffer.consume_buffered_action('p1_jump')
 	$AnimationPlayer.play("jump")
-	velocity = Vector2.UP.rotated(PI/3.5 * last_valid_wall_normal.x) * wall_jump_velocity
+	velocity = Vector2.UP.rotated(PI/3.5 * -_last_wall_dir) * wall_jump_velocity
 	
 func _on_ascending_state_physics_processing(delta):
 	_apply_gravity(delta)
 	if velocity.y > 0:
 		$StateChart.send_event('end_jump')
 	else:
+		var head_cell = tilemap.local_to_map(global_position+Vector2(0,-15.9))
+		#%TileDebug.position = tilemap.map_to_local(head_cell) # DEBUG
+		
 		for dir in [-1, 1]:
-			var top_tile = _head_cell + Vector2i(dir,-1)
+			var top_tile = head_cell + Vector2i(dir,-1)
 			
 #			DEBUG
 #			if dir == -1:
@@ -128,11 +138,28 @@ func _on_airborne_state_entered():
 	$DebugSprites.show_state('airborne')
 
 func _on_on_wall_state_entered():
-	if last_valid_wall_normal.x < 0:
+	if _last_wall_dir == 1:
 		$DebugSprites.show_state('on_wall_right')
-	else:
+	elif _last_wall_dir == -1:
 		$DebugSprites.show_state('on_wall_left')
 	
-	if InputBuffer.is_action_buffered('p1_jump', 200):
-		print('Executing buffered wall jump')
-		$StateChart.send_event('start_jump')
+func _is_near_wall(dir) -> bool:
+	var side_cell = tilemap.local_to_map(global_position+Vector2(dir*15.9,0))
+#	%TileDebug.position = tilemap.map_to_local(side_cell) # DEBUG
+	
+	for y in [-1, 0, 1]:
+		var side_tile = side_cell + Vector2i(dir,y)
+
+#		DEBUG
+#		if y == 0:
+#			%CollisionTileDebug.position = tilemap.map_to_local(side_tile)
+#		elif y == 1:
+#			%CollisionTileDebug2.position = tilemap.map_to_local(side_tile)
+#		else:
+#			%CollisionTileDebug3.position = tilemap.map_to_local(side_tile)
+			
+		if tilemap.get_cell_source_id(0, side_tile) != -1: # not empty
+			return true
+			
+	return false
+	
