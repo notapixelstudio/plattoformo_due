@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://hqf6aa5mt1qs"]
+[gd_scene load_steps=21 format=3 uid="uid://hqf6aa5mt1qs"]
 
 [ext_resource type="Script" path="res://actors/Hero.gd" id="1_a7cba"]
 [ext_resource type="Texture2D" uid="uid://bxja8hls0kh6" path="res://assets/hero.png" id="1_dfj8s"]
@@ -163,6 +163,10 @@ expression = "near_wall"
 script = ExtResource("7_fqiti")
 expression = "heading_down"
 
+[sub_resource type="Resource" id="Resource_8jr3l"]
+script = ExtResource("7_fqiti")
+expression = "not clinging"
+
 [node name="Hero" type="CharacterBody2D"]
 script = ExtResource("1_a7cba")
 
@@ -321,6 +325,12 @@ event = &"on_floor"
 script = ExtResource("6_yas5w")
 to = NodePath("../../Airborne")
 event = &"airborne"
+
+[node name="to Airborne (not clinging)" type="Node" parent="StateChart/Root/On Wall"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Airborne")
+event = &"on_wall"
+guard = SubResource("Resource_8jr3l")
 
 [node name="Sliding Up" type="Node" parent="StateChart/Root/On Wall"]
 script = ExtResource("5_hl3m4")

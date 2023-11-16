@@ -40,8 +40,8 @@ func _physics_process(delta):
 	if is_on_floor():
 		$StateChart.send_event('on_floor')
 	elif is_on_wall():
-		#_last_wall_dir = -get_wall_normal().x
-		assert(_last_wall_dir != null)
+		if _last_wall_dir == null: # it is possible to be on_wall without being near_wall in some literal corner cases
+			_last_wall_dir = -get_wall_normal().x
 		$StateChart.set_expression_property('clinging', sign(direction) == _last_wall_dir)
 		$StateChart.send_event('on_wall')
 	else:
@@ -143,10 +143,6 @@ func _on_on_wall_state_entered():
 	elif _last_wall_dir == -1:
 		$DebugSprites.show_state('on_wall_left')
 	
-#	if InputBuffer.is_action_buffered('p1_jump', 200):
-#		print('Executing buffered wall jump')
-#		$StateChart.send_event('start_jump')
-
 func _is_near_wall(dir) -> bool:
 	var side_cell = tilemap.local_to_map(global_position+Vector2(dir*15.9,0))
 #	%TileDebug.position = tilemap.map_to_local(side_cell) # DEBUG
