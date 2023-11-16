@@ -1,6 +1,6 @@
 [gd_resource type="TileSet" load_steps=6 format=3 uid="uid://cd6hbvgl1e2xy"]
 
-[ext_resource type="Texture2D" uid="uid://d2evtvw3l7jug" path="res://assets/tileset/terrain_tiles.png" id="1_b13c0"]
+[ext_resource type="Texture2D" uid="uid://b88phgq37e0g8" path="res://assets/tileset/terrain_tiles.png" id="1_b13c0"]
 [ext_resource type="Texture2D" uid="uid://bap00a5gcipy6" path="res://assets/tileset/green.png" id="2_pogk7"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_8w8gx"]

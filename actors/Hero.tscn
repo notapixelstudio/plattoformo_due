@@ -364,6 +364,7 @@ initial_node_to_watch = NodePath("../../StateChart")
 
 [node name="TileDebug" type="Sprite2D" parent="Node"]
 unique_name_in_owner = true
+visible = false
 modulate = Color(0, 0.6, 1, 0.415686)
 texture = ExtResource("1_dfj8s")
 region_enabled = true
@@ -371,6 +372,7 @@ region_rect = Rect2(0, 0, 16, 16)
 
 [node name="CollisionTileDebug" type="Sprite2D" parent="Node"]
 unique_name_in_owner = true
+visible = false
 modulate = Color(1, 0.109804, 0.701961, 0.415686)
 texture = ExtResource("1_dfj8s")
 region_enabled = true
@@ -378,6 +380,7 @@ region_rect = Rect2(0, 0, 16, 16)
 
 [node name="CollisionTileDebug2" type="Sprite2D" parent="Node"]
 unique_name_in_owner = true
+visible = false
 modulate = Color(0, 0.705882, 0.168627, 0.415686)
 texture = ExtResource("1_dfj8s")
 region_enabled = true

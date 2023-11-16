@@ -11,6 +11,7 @@ extends CharacterBody2D
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 var last_valid_wall_normal : Vector2
+var _head_cell : Vector2i
 
 func _ready():
 	InputBuffer.add_monitored_action('p1_jump')
@@ -19,6 +20,8 @@ func _get_direction():
 	return Input.get_axis("p1_left", "p1_right")
 
 func _physics_process(delta):
+	_head_cell = tilemap.local_to_map(global_position+Vector2(0,-15.9))
+	
 	var direction = _get_direction()
 	velocity.x = move_toward(velocity.x, direction * speed, acceleration * delta)
 	
@@ -43,8 +46,8 @@ func _physics_process(delta):
 		
 	move_and_slide()
 	
-	# debug head tile position
-	%TileDebug.position = tilemap.map_to_local(_get_head_cell_coords())
+#	DEBUG head tile position
+#	%TileDebug.position = tilemap.map_to_local(_head_cell)
 	
 func _apply_gravity(delta):
 	velocity.y += gravity * delta
@@ -73,23 +76,19 @@ func _on_ascending_state_physics_processing(delta):
 	if velocity.y > 0:
 		$StateChart.send_event('end_jump')
 	else:
-		if test_move(transform, velocity*delta):
-			var coords = _get_head_cell_coords(Vector2i(1,-1))
-			%CollisionTileDebug.position = tilemap.map_to_local(coords)
-			var tile_data = tilemap.get_cell_tile_data(0, coords)
-			if tile_data:
-				var corner_dir = tile_data.get_custom_data('corner_dir')
-				if corner_dir == Vector2i(-1,1):
-					global_position.x = tilemap.map_to_local(coords).x - 25 # ???
+		for dir in [-1, 1]:
+			var top_tile = _head_cell + Vector2i(dir,-1)
+			
+#			DEBUG
+#			if dir == -1:
+#				%CollisionTileDebug.position = tilemap.map_to_local(top_tile)
+#			else:
+#				%CollisionTileDebug2.position = tilemap.map_to_local(top_tile)
 				
-			coords = _get_head_cell_coords(Vector2i(-1,-1))
-			%CollisionTileDebug2.position = tilemap.map_to_local(coords)
-			tile_data = tilemap.get_cell_tile_data(0, coords)
-			if tile_data:
-				var corner_dir = tile_data.get_custom_data('corner_dir')
-				if corner_dir == Vector2i(1,1):
-					global_position.x = tilemap.map_to_local(coords).x + 25 # ???
-
+			var top_tile_data = tilemap.get_cell_tile_data(0, top_tile)
+			if top_tile_data and top_tile_data.get_custom_data('corner_dir') == Vector2i(-dir,1): # corner tile facing bottom left or right
+				global_position.x = tilemap.map_to_local(top_tile).x - 25 * dir # 16 (tile) + 8 (half tile) + 1 (to avoid collision)
+				
 func _on_falling_state_physics_processing(delta):
 	_apply_strong_gravity(delta)
 	
@@ -137,7 +136,3 @@ func _on_on_wall_state_entered():
 	if InputBuffer.is_action_buffered('p1_jump', 200):
 		print('Executing buffered wall jump')
 		$StateChart.send_event('start_jump')
-
-
-func _get_head_cell_coords(offset=Vector2i(0,0)):
-	return tilemap.local_to_map(global_position+Vector2(0,-15.9)) + offset
