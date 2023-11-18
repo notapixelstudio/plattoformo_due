@@ -230,6 +230,12 @@ initial_state = NodePath("Airborne")
 script = ExtResource("4_la8fl")
 initial_state = NodePath("Standing")
 
+[node name="to Coyote Time" type="Node" parent="StateChart/Root/On Floor"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Airborne/Coyote Time")
+event = &"tick"
+guard = SubResource("Resource_jmwex")
+
 [node name="Standing" type="Node" parent="StateChart/Root/On Floor"]
 script = ExtResource("5_hl3m4")
 
@@ -237,12 +243,6 @@ script = ExtResource("5_hl3m4")
 script = ExtResource("6_yas5w")
 to = NodePath("../../../Airborne/Jumping")
 event = &"start_jump"
-
-[node name="to Coyote Time" type="Node" parent="StateChart/Root/On Floor"]
-script = ExtResource("6_yas5w")
-to = NodePath("../../Airborne/Coyote Time")
-event = &"tick"
-guard = SubResource("Resource_jmwex")
 
 [node name="Landing" type="Node" parent="StateChart/Root/On Floor"]
 script = ExtResource("5_hl3m4")
