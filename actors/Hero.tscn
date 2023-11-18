@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://hqf6aa5mt1qs"]
+[gd_scene load_steps=25 format=3 uid="uid://hqf6aa5mt1qs"]
 
 [ext_resource type="Script" path="res://actors/Hero.gd" id="1_a7cba"]
 [ext_resource type="Texture2D" uid="uid://bxja8hls0kh6" path="res://assets/hero.png" id="1_dfj8s"]
@@ -147,13 +147,21 @@ _data = {
 "squash": SubResource("Animation_3abg0")
 }
 
+[sub_resource type="Resource" id="Resource_jmwex"]
+script = ExtResource("7_fqiti")
+expression = "airborne"
+
+[sub_resource type="Resource" id="Resource_fgsr2"]
+script = ExtResource("7_fqiti")
+expression = "on_floor"
+
 [sub_resource type="Resource" id="Resource_f88qq"]
 script = ExtResource("7_fqiti")
-expression = "clinging and velocity.y < 0 and not heading_down"
+expression = "on_wall and clinging and velocity.y < 0 and not heading_down"
 
 [sub_resource type="Resource" id="Resource_ikki5"]
 script = ExtResource("7_fqiti")
-expression = "clinging and velocity.y >= 0 and not heading_down"
+expression = "on_wall and clinging and velocity.y >= 0 and not heading_down"
 
 [sub_resource type="Resource" id="Resource_3j7bg"]
 script = ExtResource("7_fqiti")
@@ -163,9 +171,17 @@ expression = "near_wall"
 script = ExtResource("7_fqiti")
 expression = "heading_down"
 
+[sub_resource type="Resource" id="Resource_e0jvg"]
+script = ExtResource("7_fqiti")
+expression = "on_floor"
+
+[sub_resource type="Resource" id="Resource_s1htt"]
+script = ExtResource("7_fqiti")
+expression = "airborne"
+
 [sub_resource type="Resource" id="Resource_8jr3l"]
 script = ExtResource("7_fqiti")
-expression = "not clinging"
+expression = "on_wall and not clinging"
 
 [node name="Hero" type="CharacterBody2D"]
 script = ExtResource("1_a7cba")
@@ -225,7 +241,8 @@ event = &"start_jump"
 [node name="to Coyote Time" type="Node" parent="StateChart/Root/On Floor"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../Airborne/Coyote Time")
-event = &"airborne"
+event = &"tick"
+guard = SubResource("Resource_jmwex")
 
 [node name="Landing" type="Node" parent="StateChart/Root/On Floor"]
 script = ExtResource("5_hl3m4")
@@ -241,18 +258,19 @@ initial_state = NodePath("Falling")
 [node name="to Landing" type="Node" parent="StateChart/Root/Airborne"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../On Floor/Landing")
-event = &"on_floor"
+event = &"tick"
+guard = SubResource("Resource_fgsr2")
 
 [node name="to Sliding Up" type="Node" parent="StateChart/Root/Airborne"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../On Wall/Sliding Up")
-event = &"on_wall"
+event = &"tick"
 guard = SubResource("Resource_f88qq")
 
 [node name="to Sliding Down" type="Node" parent="StateChart/Root/Airborne"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../On Wall/Sliding Down")
-event = &"on_wall"
+event = &"tick"
 guard = SubResource("Resource_ikki5")
 
 [node name="to WallJumping" type="Node" parent="StateChart/Root/Airborne"]
@@ -289,7 +307,7 @@ script = ExtResource("5_hl3m4")
 [node name="to Diving" type="Node" parent="StateChart/Root/Airborne/Falling"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../Diving")
-event = &"airborne"
+event = &"tick"
 guard = SubResource("Resource_gxgyp")
 
 [node name="Diving" type="Node" parent="StateChart/Root/Airborne"]
@@ -320,17 +338,19 @@ event = &"start_jump"
 [node name="to Landing" type="Node" parent="StateChart/Root/On Wall"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../On Floor/Landing")
-event = &"on_floor"
+event = &"tick"
+guard = SubResource("Resource_e0jvg")
 
 [node name="to Airborne" type="Node" parent="StateChart/Root/On Wall"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../Airborne")
-event = &"airborne"
+event = &"tick"
+guard = SubResource("Resource_s1htt")
 
 [node name="to Airborne (not clinging)" type="Node" parent="StateChart/Root/On Wall"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../Airborne")
-event = &"on_wall"
+event = &"tick"
 guard = SubResource("Resource_8jr3l")
 
 [node name="Sliding Up" type="Node" parent="StateChart/Root/On Wall"]
@@ -339,7 +359,7 @@ script = ExtResource("5_hl3m4")
 [node name="to Sliding Down" type="Node" parent="StateChart/Root/On Wall/Sliding Up"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../Sliding Down")
-event = &"on_wall"
+event = &"tick"
 guard = SubResource("Resource_ikki5")
 
 [node name="Sliding Down" type="Node" parent="StateChart/Root/On Wall"]
@@ -348,7 +368,7 @@ script = ExtResource("5_hl3m4")
 [node name="to Diving" type="Node" parent="StateChart/Root/On Wall/Sliding Down"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../../Airborne/Diving")
-event = &"on_wall"
+event = &"tick"
 guard = SubResource("Resource_gxgyp")
 
 [node name="Node" type="Node" parent="."]

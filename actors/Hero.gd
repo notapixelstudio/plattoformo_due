@@ -37,16 +37,17 @@ func _physics_process(delta):
 	else:
 		_last_wall_dir = null
 	
-	if is_on_floor():
-		$StateChart.send_event('on_floor')
-	elif is_on_wall():
+	$StateChart.set_expression_property('on_floor', is_on_floor())
+	$StateChart.set_expression_property('on_wall', is_on_wall())
+	$StateChart.set_expression_property('airborne', not is_on_floor() and not is_on_wall())
+	
+	if is_on_wall():
 		if _last_wall_dir == null: # it is possible to be on_wall without being near_wall in some literal corner cases
 			_last_wall_dir = -get_wall_normal().x
 		$StateChart.set_expression_property('clinging', sign(direction) == _last_wall_dir)
-		$StateChart.send_event('on_wall')
-	else:
-		$StateChart.send_event('airborne')
 		
+	$StateChart.send_event('tick')
+	
 	if Input.is_action_just_pressed("p1_jump"):
 		$StateChart.send_event('start_jump')
 		
