@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://hqf6aa5mt1qs"]
+[gd_scene load_steps=28 format=3 uid="uid://hqf6aa5mt1qs"]
 
 [ext_resource type="Script" path="res://actors/Hero.gd" id="1_a7cba"]
 [ext_resource type="Texture2D" uid="uid://bxja8hls0kh6" path="res://assets/hero.png" id="1_dfj8s"]
@@ -139,9 +139,39 @@ tracks/1/keys = {
 "values": [Vector2(1, 1), Vector2(1.2, 0.8), Vector2(1, 1)]
 }
 
+[sub_resource type="Animation" id="Animation_4mfid"]
+resource_name = "crouch"
+length = 0.1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1),
+"transitions": PackedFloat32Array(-2, -2),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 6)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.1),
+"transitions": PackedFloat32Array(-2, -2),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.4, 0.63)]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ssx53"]
 _data = {
 "RESET": SubResource("Animation_kub3g"),
+"crouch": SubResource("Animation_4mfid"),
 "dive": SubResource("Animation_p5m8m"),
 "jump": SubResource("Animation_lcwcn"),
 "squash": SubResource("Animation_3abg0")
@@ -150,6 +180,14 @@ _data = {
 [sub_resource type="Resource" id="Resource_jmwex"]
 script = ExtResource("7_fqiti")
 expression = "airborne"
+
+[sub_resource type="Resource" id="Resource_f628a"]
+script = ExtResource("7_fqiti")
+expression = "heading_down"
+
+[sub_resource type="Resource" id="Resource_wtf0g"]
+script = ExtResource("7_fqiti")
+expression = "not heading_down"
 
 [sub_resource type="Resource" id="Resource_fgsr2"]
 script = ExtResource("7_fqiti")
@@ -186,11 +224,12 @@ expression = "on_wall and not clinging"
 [node name="Hero" type="CharacterBody2D"]
 script = ExtResource("1_a7cba")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("RectangleShape2D_1iqcp")
-
 [node name="Sprite" type="Sprite2D" parent="."]
 texture = ExtResource("1_dfj8s")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+unique_name_in_owner = true
+shape = SubResource("RectangleShape2D_1iqcp")
 
 [node name="DebugSprites" type="Node2D" parent="."]
 visible = false
@@ -244,12 +283,32 @@ script = ExtResource("6_yas5w")
 to = NodePath("../../../Airborne/Jumping")
 event = &"start_jump"
 
+[node name="to Crouching" type="Node" parent="StateChart/Root/On Floor/Standing"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Crouching")
+event = &"tick"
+guard = SubResource("Resource_f628a")
+
 [node name="Landing" type="Node" parent="StateChart/Root/On Floor"]
 script = ExtResource("5_hl3m4")
 
 [node name="to Standing" type="Node" parent="StateChart/Root/On Floor/Landing"]
 script = ExtResource("6_yas5w")
 to = NodePath("../../Standing")
+
+[node name="Crouching" type="Node" parent="StateChart/Root/On Floor"]
+script = ExtResource("5_hl3m4")
+
+[node name="to Standing" type="Node" parent="StateChart/Root/On Floor/Crouching"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../Standing")
+event = &"tick"
+guard = SubResource("Resource_wtf0g")
+
+[node name="to Jumping" type="Node" parent="StateChart/Root/On Floor/Crouching"]
+script = ExtResource("6_yas5w")
+to = NodePath("../../../Airborne/Jumping")
+event = &"start_jump"
 
 [node name="Airborne" type="Node" parent="StateChart/Root"]
 script = ExtResource("4_la8fl")
@@ -414,6 +473,8 @@ region_rect = Rect2(0, 0, 16, 16)
 
 [connection signal="state_entered" from="StateChart/Root/On Floor" to="." method="_on_on_floor_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/On Floor/Landing" to="." method="_on_landing_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/On Floor/Crouching" to="." method="_on_crouching_state_entered"]
+[connection signal="state_exited" from="StateChart/Root/On Floor/Crouching" to="." method="_on_crouching_state_exited"]
 [connection signal="state_entered" from="StateChart/Root/Airborne" to="." method="_on_airborne_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Airborne/Jumping" to="." method="_on_jumping_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Airborne/WallJumping" to="." method="_on_wall_jumping_state_entered"]

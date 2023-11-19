@@ -164,3 +164,19 @@ func _is_near_wall(dir) -> bool:
 			
 	return false
 	
+
+func _on_crouching_state_entered():
+	$AnimationPlayer.play("crouch")
+	
+	%CollisionShape2D.shape.size = Vector2(32, 14)
+	%CollisionShape2D.position.y = 9
+	
+	speed = 150
+
+func _on_crouching_state_exited():
+	$AnimationPlayer.play_backwards("crouch")
+	
+	%CollisionShape2D.shape.size = Vector2(32, 32)
+	%CollisionShape2D.position.y = 0
+	
+	speed = 400 # FIXME need a way to handle modifiers
