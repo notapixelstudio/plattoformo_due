@@ -378,6 +378,7 @@ offset_left = 752.0
 offset_top = 46.0
 offset_right = -106.0
 offset_bottom = -258.0
+enabled = false
 initial_node_to_watch = NodePath("../../StateChart")
 
 [node name="TileDebug" type="Sprite2D" parent="Node"]

@@ -22,3 +22,13 @@ layer_0/tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 1, 131072, 0, 1, 196608,
 [node name="Hero" parent="." node_paths=PackedStringArray("tilemap") instance=ExtResource("2_ttnc4")]
 position = Vector2(448, 432)
 tilemap = NodePath("../TileMap")
+
+[node name="Label" type="Label" parent="."]
+offset_left = 520.0
+offset_top = 88.0
+offset_right = 1030.0
+offset_bottom = 166.0
+theme_override_font_sizes/font_size = 26
+text = "arrow keys to move
+C to jump
+gamepad supported"
